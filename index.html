@@ -1,410 +1,892 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#dceeff" />
-  <meta name="description" content="A little corner of the internet." />
-  <title>Blue Hour — A Little Corner of the Internet</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ELSEWHERE — The Arrival</title>
 
-  <!-- Optional web fonts. The page has fallback fonts if Google Fonts is unavailable. -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&family=Nunito:wght@400;500;600;700;800&family=Playfair+Display:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+* { box-sizing: border-box; }
 
-  <style>
-    :root {
-      --page: #eaf5ff;
-      --page-deep: #d8ebff;
-      --surface: rgba(255, 255, 255, 0.68);
-      --surface-solid: #f8fcff;
-      --ink: #263d59;
-      --muted: #7088a4;
-      --accent: #7eb8e8;
-      --accent-dark: #477eae;
-      --line: rgba(111, 157, 197, 0.22);
-      --shadow: 0 22px 70px rgba(79, 126, 168, 0.14);
-      --font: 'Nunito', sans-serif;
-    }
+body {
+  margin: 0;
+  overflow: hidden;
+  background: #080d20;
+  color: white;
+  font-family: Arial, sans-serif;
+}
 
-    * { box-sizing: border-box; }
+canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
 
-    html { scroll-behavior: smooth; }
+#intro, #transition {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background: radial-gradient(ellipse, #17244355, #050817cc);
+  transition: opacity 1.5s;
+}
 
-    body {
-      margin: 0;
-      min-height: 100vh;
-      color: var(--ink);
-      font-family: var(--font);
-      background:
-        radial-gradient(circle at 12% 12%, rgba(255,255,255,.95) 0 1px, transparent 2px),
-        radial-gradient(circle at 82% 20%, rgba(255,255,255,.85) 0 1px, transparent 2px),
-        radial-gradient(ellipse at 12% 10%, #f8fcff 0%, transparent 34%),
-        radial-gradient(ellipse at 88% 75%, #c9e4ff 0%, transparent 38%),
-        linear-gradient(145deg, var(--page), var(--page-deep));
-      background-attachment: fixed;
-      transition: background 350ms ease, color 250ms ease;
-    }
+#intro h1 {
+  font-family: Georgia, serif;
+  font-size: clamp(45px, 10vw, 90px);
+  letter-spacing: 12px;
+  margin: 0;
+  text-shadow: 0 0 30px #8baaff;
+}
 
-    body[data-font="dm"] { --font: 'DM Sans', sans-serif; }
-    body[data-font="playfair"] { --font: 'Playfair Display', serif; }
-    body[data-font="cormorant"] { --font: 'Cormorant Garamond', serif; }
-    body[data-font="space"] { --font: 'Space Grotesk', sans-serif; }
-    body[data-font="nunito"] { --font: 'Nunito', sans-serif; }
+#intro p {
+  letter-spacing: 4px;
+  font-size: 11px;
+  margin: 15px 0 35px;
+  color: #b7c7f9;
+}
 
-    body[data-theme="cloud"] {
-      --page: #f2f8ff;
-      --page-deep: #e4f0fb;
-      --surface: rgba(255,255,255,.78);
-      --surface-solid: #ffffff;
-      --ink: #33465d;
-      --muted: #7c8da1;
-      --accent: #a6c9e9;
-      --accent-dark: #668db4;
-      --line: rgba(125, 157, 187, .2);
-    }
+button {
+  cursor: pointer;
+  color: white;
+  font: inherit;
+}
 
-    body[data-theme="lavender"] {
-      --page: #eef0ff;
-      --page-deep: #dfe4ff;
-      --surface: rgba(255,255,255,.7);
-      --surface-solid: #fbfaff;
-      --ink: #3b4165;
-      --muted: #8589ad;
-      --accent: #a4aeea;
-      --accent-dark: #727fbe;
-      --line: rgba(126, 135, 194, .22);
-    }
+#enter {
+  padding: 15px 30px;
+  border: 1px solid #c6d6ff;
+  background: #7895db35;
+  border-radius: 40px;
+  letter-spacing: 3px;
+  box-shadow: 0 0 25px #7298ff77;
+  backdrop-filter: blur(10px);
+}
 
-    button, select { font: inherit; }
+#enter:hover {
+  background: #829be877;
+  box-shadow: 0 0 40px #9cbaff;
+}
 
-    .page-shell {
-      width: min(1100px, calc(100% - 40px));
-      margin: 0 auto;
-      padding: 28px 0 42px;
-    }
+#transition {
+  opacity: 0;
+  pointer-events: none;
+  background: #02040b;
+}
 
-    .topbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 18px;
-      margin-bottom: 52px;
-    }
+#hud {
+  position: fixed;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  display: none;
+}
 
-    .wordmark {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: .82rem;
-      font-weight: 800;
-      letter-spacing: .16em;
-      text-transform: uppercase;
-    }
+#logo {
+  position: absolute;
+  top: 20px;
+  left: 22px;
+  font-family: Georgia, serif;
+  letter-spacing: 4px;
+  font-size: 16px;
+}
 
-    .wordmark-star { color: var(--accent-dark); font-size: 1.2rem; }
+#location {
+  position: absolute;
+  top: 48px;
+  left: 23px;
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: #b6caff;
+}
 
-    .customizer {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-      gap: 10px;
-    }
+#instructions {
+  position: absolute;
+  bottom: 22px;
+  width: 100%;
+  text-align: center;
+  font-size: 11px;
+  color: #d4ddff;
+  text-shadow: 0 0 10px #789aff;
+}
 
-    .control {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      background: var(--surface);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      color: var(--muted);
-      font-size: .78rem;
-    }
+#controls {
+  position: absolute;
+  bottom: 65px;
+  right: 20px;
+  display: grid;
+  grid-template-columns: repeat(3, 44px);
+  gap: 5px;
+  pointer-events: auto;
+}
 
-    .control label { white-space: nowrap; }
+#controls button {
+  height: 40px;
+  background: #718fda66;
+  border: 1px solid #b7c9ff88;
+  border-radius: 9px;
+  touch-action: none;
+}
 
-    .control select {
-      max-width: 125px;
-      border: 0;
-      outline: 0;
-      color: var(--ink);
-      background: transparent;
-      cursor: pointer;
-      font-weight: 700;
-    }
+#controls button:active {
+  background: #b3c9ff99;
+}
 
-    .control select:focus-visible {
-      outline: 2px solid var(--accent-dark);
-      outline-offset: 4px;
-      border-radius: 4px;
-    }
+#up { grid-column: 2; }
+#left { grid-column: 1; grid-row: 2; }
+#down { grid-column: 2; grid-row: 2; }
+#right { grid-column: 3; grid-row: 2; }
 
-    .hero {
-      position: relative;
-      overflow: hidden;
-      min-height: 420px;
-      display: grid;
-      place-items: center;
-      padding: 70px 28px;
-      border: 1px solid rgba(255,255,255,.8);
-      border-radius: 34px;
-      background: linear-gradient(135deg, rgba(255,255,255,.78), rgba(255,255,255,.38));
-      box-shadow: var(--shadow);
-      text-align: center;
-      isolation: isolate;
-    }
+#exit {
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  pointer-events: auto;
+  border: 1px solid #b7c9ff88;
+  border-radius: 20px;
+  padding: 9px 14px;
+  background: #172443aa;
+  font-size: 11px;
+}
 
-    .hero::before, .hero::after {
-      content: "";
-      position: absolute;
-      z-index: -1;
-      border-radius: 50%;
-      filter: blur(2px);
-      pointer-events: none;
-    }
-
-    .hero::before {
-      width: 280px; height: 280px;
-      top: -130px; left: -80px;
-      background: rgba(175, 217, 249, .38);
-    }
-
-    .hero::after {
-      width: 340px; height: 340px;
-      right: -140px; bottom: -190px;
-      background: rgba(192, 213, 255, .42);
-    }
-
-    .eyebrow {
-      margin: 0 0 18px;
-      color: var(--accent-dark);
-      font-size: .74rem;
-      font-weight: 800;
-      letter-spacing: .22em;
-      text-transform: uppercase;
-    }
-
-    h1 {
-      max-width: 760px;
-      margin: 0;
-      font-size: clamp(2.65rem, 8vw, 5.8rem);
-      line-height: .98;
-      letter-spacing: -.055em;
-      font-weight: 700;
-    }
-
-    .hero-copy {
-      max-width: 490px;
-      margin: 24px auto 0;
-      color: var(--muted);
-      font-size: clamp(.98rem, 2vw, 1.12rem);
-      line-height: 1.8;
-    }
-
-    .hero-sparkle {
-      position: absolute;
-      color: var(--accent-dark);
-      opacity: .55;
-      user-select: none;
-    }
-
-    .sparkle-one { top: 18%; right: 17%; font-size: 1.65rem; }
-    .sparkle-two { bottom: 17%; left: 15%; font-size: 1.2rem; }
-    .sparkle-three { top: 24%; left: 20%; font-size: .9rem; }
-
-    .section-heading {
-      display: flex;
-      align-items: end;
-      justify-content: space-between;
-      gap: 16px;
-      margin: 58px 4px 20px;
-    }
-
-    .section-heading h2 {
-      margin: 0;
-      font-size: clamp(1.55rem, 4vw, 2.1rem);
-      letter-spacing: -.04em;
-    }
-
-    .section-heading p {
-      margin: 0;
-      color: var(--muted);
-      font-size: .9rem;
-    }
-
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 16px;
-    }
-
-    .card {
-      min-height: 190px;
-      padding: 25px;
-      border: 1px solid rgba(255,255,255,.8);
-      border-radius: 24px;
-      background: var(--surface);
-      box-shadow: 0 12px 35px rgba(79, 126, 168, .08);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      transition: transform 220ms ease, box-shadow 220ms ease;
-    }
-
-    .card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 18px 38px rgba(79, 126, 168, .13);
-    }
-
-    .card-icon {
-      display: grid;
-      width: 42px;
-      height: 42px;
-      margin-bottom: 18px;
-      place-items: center;
-      border-radius: 14px;
-      color: var(--accent-dark);
-      background: rgba(147, 197, 235, .2);
-      font-size: 1.2rem;
-    }
-
-    .card h3 { margin: 0 0 8px; font-size: 1.12rem; }
-    .card p { margin: 0; color: var(--muted); font-size: .92rem; line-height: 1.7; }
-
-    .quote {
-      margin: 20px 0 0;
-      padding: 30px 24px;
-      border: 1px solid var(--line);
-      border-radius: 24px;
-      color: var(--accent-dark);
-      background: rgba(255,255,255,.35);
-      text-align: center;
-      font-size: clamp(1.1rem, 3vw, 1.5rem);
-      font-weight: 600;
-    }
-
-    footer {
-      padding: 32px 0 8px;
-      color: var(--muted);
-      text-align: center;
-      font-size: .78rem;
-      letter-spacing: .04em;
-    }
-
-    @media (max-width: 760px) {
-      .page-shell { width: min(100% - 26px, 600px); padding-top: 18px; }
-      .topbar { align-items: flex-start; flex-direction: column; margin-bottom: 24px; }
-      .customizer { justify-content: flex-start; }
-      .hero { min-height: 370px; padding: 58px 20px; border-radius: 27px; }
-      .sparkle-one { right: 9%; }
-      .sparkle-two { left: 8%; }
-      .sparkle-three { left: 10%; }
-      .section-heading { align-items: flex-start; flex-direction: column; margin-top: 42px; }
-      .cards { grid-template-columns: 1fr; }
-      .card { min-height: auto; }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
-    }
-  </style>
+@media (min-width: 750px) {
+  #controls { display: none; }
+}
+</style>
 </head>
-<body data-font="nunito" data-theme="blue">
-  <main class="page-shell">
-    <header class="topbar">
-      <div class="wordmark"><span class="wordmark-star">✦</span> Blue Hour</div>
 
-      <div class="customizer" aria-label="Page appearance settings">
-        <div class="control">
-          <label for="font-picker">Font</label>
-          <select id="font-picker" aria-label="Choose a font">
-            <option value="nunito">Nunito</option>
-            <option value="dm">DM Sans</option>
-            <option value="playfair">Playfair</option>
-            <option value="cormorant">Cormorant</option>
-            <option value="space">Space Grotesk</option>
-          </select>
-        </div>
-        <div class="control">
-          <label for="theme-picker">Colour</label>
-          <select id="theme-picker" aria-label="Choose a colour theme">
-            <option value="blue">Baby blue</option>
-            <option value="cloud">Cloud white</option>
-            <option value="lavender">Blue lavender</option>
-          </select>
-        </div>
-      </div>
-    </header>
+<body>
 
-    <section class="hero" aria-labelledby="main-title">
-      <span class="hero-sparkle sparkle-one" aria-hidden="true">✧</span>
-      <span class="hero-sparkle sparkle-two" aria-hidden="true">✦</span>
-      <span class="hero-sparkle sparkle-three" aria-hidden="true">·</span>
-      <div>
-        <p class="eyebrow">A little space of your own</p>
-        <h1 id="main-title">A little corner<br />of the internet.</h1>
-        <p class="hero-copy">A place for your favourite things, your thoughts, your memories, and everything in between.</p>
-      </div>
-    </section>
+<div id="intro">
+  <h1>ELSEWHERE</h1>
+  <p>THERE IS MORE BEYOND WHAT YOU KNOW</p>
+  <button id="enter">ENTER ELSEWHERE ↗️</button>
+</div>
 
-    <div class="section-heading">
-      <h2>Make yourself at home.</h2>
-      <p>Little things that make this space yours.</p>
-    </div>
+<div id="transition"></div>
 
-    <section class="cards" aria-label="Page sections">
-      <article class="card">
-        <div class="card-icon" aria-hidden="true">☁</div>
-        <h3>About this space</h3>
-        <p>Add a short introduction here. Tell visitors what this website is about.</p>
-      </article>
-      <article class="card">
-        <div class="card-icon" aria-hidden="true">✿</div>
-        <h3>Favourite things</h3>
-        <p>Share the songs, photos, places, hobbies, or little details you love.</p>
-      </article>
-      <article class="card">
-        <div class="card-icon" aria-hidden="true">✎</div>
-        <h3>Little notes</h3>
-        <p>Use this space for a message, a collection of quotes, or a special update.</p>
-      </article>
-    </section>
+<div id="hud">
+  <div id="logo">ELSEWHERE</div>
+  <div id="location">01 — THE ARRIVAL</div>
 
-    <blockquote class="quote">“Let the little things feel lovely.”</blockquote>
+  <div id="instructions">
+    WASD / ARROWS TO MOVE · DRAG TO LOOK AROUND
+  </div>
 
-    <footer>Made with a little bit of blue ✦</footer>
-  </main>
+  <div id="controls">
+    <button id="up">▲</button>
+    <button id="left">◀️</button>
+    <button id="down">▼</button>
+    <button id="right">▶️</button>
+  </div>
 
-  <script>
-    const fontPicker = document.getElementById('font-picker');
-    const themePicker = document.getElementById('theme-picker');
+  <button id="exit">EXIT EXPERIENCE</button>
+</div>
 
-    // Restore saved appearance choices when the page is opened again.
-    const savedFont = localStorage.getItem('blue-hour-font');
-    const savedTheme = localStorage.getItem('blue-hour-theme');
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js"
+  }
+}
+</script>
 
-    if (savedFont && [...fontPicker.options].some(option => option.value === savedFont)) {
-      document.body.dataset.font = savedFont;
-      fontPicker.value = savedFont;
+<script type="module">
+
+import * as THREE from "three";
+
+// ----------------------------------
+// 1. SCENE
+// ----------------------------------
+
+const scene = new THREE.Scene();
+
+scene.background = new THREE.Color("#111d3d");
+
+scene.fog = new THREE.FogExp2("#182b50", 0.009);
+
+const camera = new THREE.PerspectiveCamera(
+  65,
+  window.innerWidth / window.innerHeight,
+  0.1,
+  300
+);
+
+camera.position.set(0, 2.5, 8);
+
+const renderer = new THREE.WebGLRenderer({
+  antialias: true,
+  powerPreference: "high-performance"
+});
+
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(
+  Math.min(window.devicePixelRatio, 1.5)
+);
+
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.2;
+
+document.body.appendChild(renderer.domElement);
+
+// ----------------------------------
+// 2. LIGHTING
+// ----------------------------------
+
+const ambient = new THREE.HemisphereLight(
+  "#c8ddff",
+  "#29314f",
+  2.0
+);
+
+scene.add(ambient);
+
+const moon = new THREE.DirectionalLight(
+  "#d6e5ff",
+  3
+);
+
+moon.position.set(-8, 15, 10);
+scene.add(moon);
+
+const portalLight = new THREE.PointLight(
+  "#8b8dff",
+  25,
+  25
+);
+
+portalLight.position.set(0, 3, -9);
+scene.add(portalLight);
+
+// ----------------------------------
+// 3. WATER
+// ----------------------------------
+
+const waterGeometry = new THREE.PlaneGeometry(
+  300, 300, 100, 100
+);
+
+const waterMaterial = new THREE.MeshPhysicalMaterial({
+  color: "#315d91",
+  metalness: 0.75,
+  roughness: 0.18,
+  clearcoat: 1,
+  clearcoatRoughness: 0.1
+});
+
+const water = new THREE.Mesh(
+  waterGeometry,
+  waterMaterial
+);
+
+water.rotation.x = -Math.PI / 2;
+water.position.y = -2.8;
+scene.add(water);
+
+// ----------------------------------
+// 4. FLOATING ISLAND
+// ----------------------------------
+
+const island = new THREE.Mesh(
+  new THREE.CylinderGeometry(18, 13, 3, 64, 4),
+  new THREE.MeshStandardMaterial({
+    color: "#43516c",
+    roughness: 0.9
+  })
+);
+
+island.position.set(0, -1.1, -10);
+scene.add(island);
+
+const grass = new THREE.Mesh(
+  new THREE.CylinderGeometry(18, 18, 0.5, 64),
+  new THREE.MeshStandardMaterial({
+    color: "#657b79",
+    roughness: 1
+  })
+);
+
+grass.position.set(0, 0.6, -10);
+scene.add(grass);
+
+// ----------------------------------
+// 5. ROCK FORMATIONS
+// ----------------------------------
+
+function createRock(x, y, z, scale) {
+
+  const rock = new THREE.Mesh(
+    new THREE.DodecahedronGeometry(1, 1),
+    new THREE.MeshStandardMaterial({
+      color: "#56637d",
+      roughness: 0.85
+    })
+  );
+
+  rock.position.set(x, y, z);
+  rock.scale.set(
+    scale,
+    scale * 0.8,
+    scale
+  );
+
+  scene.add(rock);
+  return rock;
+}
+
+const rocks = [];
+
+for (let i = 0; i < 24; i++) {
+
+  const angle = Math.random() * Math.PI * 2;
+  const radius = 12 + Math.random() * 18;
+
+  const rock = createRock(
+    Math.cos(angle) * radius,
+    -2 + Math.random() * 8,
+    -10 + Math.sin(angle) * radius,
+    1 + Math.random() * 3
+  );
+
+  rocks.push(rock);
+}
+
+// ----------------------------------
+// 6. TREES
+// ----------------------------------
+
+function createTree(x, z, size = 1) {
+
+  const trunk = new THREE.Mesh(
+    new THREE.CylinderGeometry(
+      0.12 * size,
+      0.2 * size,
+      2 * size,
+      7
+    ),
+    new THREE.MeshStandardMaterial({
+      color: "#625044"
+    })
+  );
+
+  trunk.position.set(x, 1.5 * size, z);
+  scene.add(trunk);
+
+  const leaves = new THREE.Mesh(
+    new THREE.ConeGeometry(1.1 * size, 3 * size, 8),
+    new THREE.MeshStandardMaterial({
+      color: "#718f83",
+      roughness: 0.8
+    })
+  );
+
+  leaves.position.set(x, 3.3 * size, z);
+  scene.add(leaves);
+}
+
+for (let i = 0; i < 12; i++) {
+
+  const angle = Math.random() * Math.PI * 2;
+  const radius = 8 + Math.random() * 7;
+
+  createTree(
+    Math.cos(angle) * radius,
+    -10 + Math.sin(angle) * radius,
+    0.7 + Math.random() * 0.7
+  );
+}
+
+// ----------------------------------
+// 7. FLOATING ARCHITECTURE
+// ----------------------------------
+
+function createStructure(x, y, z, size) {
+
+  const material = new THREE.MeshStandardMaterial({
+    color: "#a4b5c8",
+    metalness: 0.6,
+    roughness: 0.25
+  });
+
+  const pillar1 = new THREE.Mesh(
+    new THREE.BoxGeometry(0.8 * size, 7 * size, 0.8 * size),
+    material
+  );
+
+  pillar1.position.set(x - 3 * size, y, z);
+  scene.add(pillar1);
+
+  const pillar2 = pillar1.clone();
+  pillar2.position.x = x + 3 * size;
+  scene.add(pillar2);
+
+  const top = new THREE.Mesh(
+    new THREE.BoxGeometry(7 * size, 0.8 * size, 1 * size),
+    material
+  );
+
+  top.position.set(x, y + 3.6 * size, z);
+  scene.add(top);
+
+  const ring = new THREE.Mesh(
+    new THREE.TorusGeometry(2.5 * size, 0.12 * size, 12, 48),
+    new THREE.MeshStandardMaterial({
+      color: "#a9d9ff",
+      emissive: "#407bdc",
+      emissiveIntensity: 1.5,
+      metalness: 0.7
+    })
+  );
+
+  ring.position.set(x, y + 6 * size, z);
+  scene.add(ring);
+
+  return ring;
+}
+
+const structures = [];
+
+structures.push(createStructure(-12, 4, -25, 1.2));
+structures.push(createStructure(14, 6, -30, 1.6));
+structures.push(createStructure(0, 8, -45, 2));
+
+// ----------------------------------
+// 8. PORTAL
+// ----------------------------------
+
+const portal = new THREE.Group();
+
+portal.position.set(0, 2.6, -9);
+
+const portalRing = new THREE.Mesh(
+  new THREE.TorusGeometry(2.3, 0.22, 20, 100),
+  new THREE.MeshPhysicalMaterial({
+    color: "#b8d5ff",
+    emissive: "#697fff",
+    emissiveIntensity: 3,
+    metalness: 0.9,
+    roughness: 0.15
+  })
+);
+
+portal.add(portalRing);
+
+// Inner energy surface
+
+const portalShader = new THREE.ShaderMaterial({
+
+  uniforms: {
+    time: { value: 0 }
+  },
+
+  vertexShader: `
+    varying vec2 vUv;
+
+    void main() {
+      vUv = uv;
+      gl_Position =
+        projectionMatrix *
+        modelViewMatrix *
+        vec4(position,1.0);
     }
+  `,
 
-    if (savedTheme && [...themePicker.options].some(option => option.value === savedTheme)) {
-      document.body.dataset.theme = savedTheme;
-      themePicker.value = savedTheme;
+  fragmentShader: `
+    uniform float time;
+    varying vec2 vUv;
+
+    void main() {
+
+      vec2 p = vUv - 0.5;
+
+      float d = length(p);
+
+      float wave = sin(
+        d * 35.0 - time * 3.0
+        + sin(p.x * 15.0 + time)
+      );
+
+      vec3 blue = vec3(0.15,0.35,0.9);
+      vec3 purple = vec3(0.55,0.25,0.9);
+      vec3 cyan = vec3(0.3,0.9,1.0);
+
+      float mixValue =
+        0.5 + 0.5 * sin(time + d * 20.0);
+
+      vec3 color = mix(blue,purple,mixValue);
+
+      color = mix(
+        color,
+        cyan,
+        smoothstep(0.2,0.5,wave) * 0.4
+      );
+
+      float glow = 1.0 - smoothstep(0.0,0.5,d);
+
+      gl_FragColor = vec4(
+        color * glow,
+        0.88
+      );
     }
+  `,
 
-    fontPicker.addEventListener('change', (event) => {
-      document.body.dataset.font = event.target.value;
-      localStorage.setItem('blue-hour-font', event.target.value);
-    });
+  transparent: true,
+  side: THREE.DoubleSide
+});
 
-    themePicker.addEventListener('change', (event) => {
-      document.body.dataset.theme = event.target.value;
-      localStorage.setItem('blue-hour-theme', event.target.value);
-    });
-  </script>
+const portalSurface = new THREE.Mesh(
+  new THREE.CircleGeometry(2.18, 80),
+  portalShader
+);
+
+portal.add(portalSurface);
+
+scene.add(portal);
+
+// ----------------------------------
+// 9. PARTICLES
+// ----------------------------------
+
+const particleCount = 600;
+
+const particlePositions = new Float32Array(
+  particleCount * 3
+);
+
+for (let i = 0; i < particleCount; i++) {
+
+  particlePositions[i * 3] =
+    (Math.random() - 0.5) * 100;
+
+  particlePositions[i * 3 + 1] =
+    Math.random() * 35 - 5;
+
+  particlePositions[i * 3 + 2] =
+    -Math.random() * 100;
+}
+
+const particleGeometry = new THREE.BufferGeometry();
+
+particleGeometry.setAttribute(
+  "position",
+  new THREE.BufferAttribute(particlePositions, 3)
+);
+
+const particleMaterial = new THREE.PointsMaterial({
+  color: "#d1dcff",
+  size: 0.09,
+  transparent: true,
+  opacity: 0.8
+});
+
+const particles = new THREE.Points(
+  particleGeometry,
+  particleMaterial
+);
+
+scene.add(particles);
+
+// ----------------------------------
+// 10. CAMERA CONTROLS
+// ----------------------------------
+
+let yaw = 0;
+let pitch = 0;
+let entered = false;
+let dragging = false;
+let previousX = 0;
+let previousY = 0;
+
+const keys = {};
+
+const moveSpeed = 0.13;
+
+document.addEventListener("keydown", e => {
+  keys[e.key.toLowerCase()] = true;
+});
+
+document.addEventListener("keyup", e => {
+  keys[e.key.toLowerCase()] = false;
+});
+
+renderer.domElement.addEventListener(
+  "pointerdown",
+  e => {
+    if (!entered) return;
+
+    dragging = true;
+    previousX = e.clientX;
+    previousY = e.clientY;
+    renderer.domElement.setPointerCapture(e.pointerId);
+  }
+);
+
+renderer.domElement.addEventListener(
+  "pointerup",
+  () => dragging = false
+);
+
+renderer.domElement.addEventListener(
+  "pointercancel",
+  () => dragging = false
+);
+
+renderer.domElement.addEventListener(
+  "pointermove",
+  e => {
+
+    if (!dragging || !entered) return;
+
+    const dx = e.clientX - previousX;
+    const dy = e.clientY - previousY;
+
+    yaw -= dx * 0.004;
+    pitch -= dy * 0.004;
+
+    pitch = THREE.MathUtils.clamp(
+      pitch, -1.1, 1.1
+    );
+
+    previousX = e.clientX;
+    previousY = e.clientY;
+  }
+);
+
+function updateMovement() {
+
+  if (!entered) return;
+
+  let forward = 0;
+  let sideways = 0;
+
+  if (keys["w"] || keys["arrowup"]) forward++;
+  if (keys["s"] || keys["arrowdown"]) forward--;
+  if (keys["a"] || keys["arrowleft"]) sideways--;
+  if (keys["d"] || keys["arrowright"]) sideways++;
+
+  const direction = new THREE.Vector3(
+    Math.sin(yaw),
+    0,
+    -Math.cos(yaw)
+  );
+
+  const right = new THREE.Vector3(
+    Math.cos(yaw),
+    0,
+    Math.sin(yaw)
+  );
+
+  camera.position.addScaledVector(
+    direction,
+    forward * moveSpeed
+  );
+
+  camera.position.addScaledVector(
+    right,
+    sideways * moveSpeed
+  );
+
+  camera.position.y = THREE.MathUtils.clamp(
+    camera.position.y, 1.2, 12
+  );
+
+  camera.rotation.order = "YXZ";
+  camera.rotation.set(pitch, yaw, 0);
+}
+
+// Mobile buttons
+
+function holdButton(id, key) {
+
+  const button = document.getElementById(id);
+
+  button.addEventListener("pointerdown", e => {
+    e.preventDefault();
+    keys[key] = true;
+  });
+
+  button.addEventListener("pointerup", () => {
+    keys[key] = false;
+  });
+
+  button.addEventListener("pointerleave", () => {
+    keys[key] = false;
+  });
+
+  button.addEventListener("pointercancel", () => {
+    keys[key] = false;
+  });
+}
+
+holdButton("up", "w");
+holdButton("down", "s");
+holdButton("left", "a");
+holdButton("right", "d");
+
+// ----------------------------------
+// 11. PORTAL INTRO
+// ----------------------------------
+
+document.getElementById("enter").addEventListener(
+  "click",
+  () => {
+
+    const intro = document.getElementById("intro");
+    const transition = document.getElementById("transition");
+
+    intro.style.opacity = "0";
+
+    setTimeout(() => {
+      intro.style.display = "none";
+      transition.style.opacity = "1";
+    }, 1000);
+
+    setTimeout(() => {
+
+      const start = performance.now();
+      const duration = 4000;
+
+      function travel(now) {
+
+        const progress = Math.min(
+          (now - start) / duration, 1
+        );
+
+        const eased =
+          1 - Math.pow(1 - progress, 3);
+
+        camera.position.z = 8 - eased * 16;
+        camera.position.y = 2.5 + Math.sin(
+          progress * Math.PI
+        ) * 0.4;
+
+        camera.lookAt(0, 2.5, -12);
+
+        if (progress < 1) {
+          requestAnimationFrame(travel);
+        } else {
+
+          camera.position.set(0, 2.5, -5);
+          yaw = 0;
+          pitch = 0;
+          entered = true;
+
+          transition.style.opacity = "0";
+
+          setTimeout(() => {
+            transition.style.display = "none";
+            document.getElementById("hud").style.display = "block";
+          }, 1200);
+        }
+      }
+
+      requestAnimationFrame(travel);
+
+    }, 1500);
+
+  }
+);
+
+// ----------------------------------
+// 12. EXIT
+// ----------------------------------
+
+document.getElementById("exit").addEventListener(
+  "click",
+  () => {
+    entered = false;
+
+    const intro = document.getElementById("intro");
+    const transition = document.getElementById("transition");
+
+    transition.style.display = "flex";
+    transition.style.opacity = "1";
+
+    document.getElementById("hud").style.display = "none";
+
+    setTimeout(() => {
+      camera.position.set(0, 2.5, 8);
+      yaw = 0;
+      pitch = 0;
+
+      intro.style.display = "flex";
+
+      requestAnimationFrame(() => {
+        intro.style.opacity = "1";
+        transition.style.opacity = "0";
+      });
+
+      setTimeout(() => {
+        transition.style.display = "none";
+      }, 1500);
+
+    }, 1000);
+  }
+);
+
+// ----------------------------------
+// 13. ANIMATION
+// ----------------------------------
+
+const clock = new THREE.Clock();
+
+function animate() {
+
+  requestAnimationFrame(animate);
+
+  const time = clock.getElapsedTime();
+
+  portal.rotation.z = Math.sin(time * 0.4) * 0.04;
+  portalShader.uniforms.time.value = time;
+
+  portalLight.intensity =
+    20 + Math.sin(time * 2) * 5;
+
+  structures.forEach((structure, i) => {
+    structure.rotation.z =
+      Math.sin(time * 0.4 + i) * 0.15;
+  });
+
+  particles.rotation.y = time * 0.008;
+
+  water.material.color.setHSL(
+    0.59 + Math.sin(time * 0.12) * 0.04,
+    0.48,
+    0.36
+  );
+
+  updateMovement();
+
+  renderer.render(scene, camera);
+}
+
+animate();
+
+// ----------------------------------
+// 14. RESPONSIVE SCREEN
+// ----------------------------------
+
+window.addEventListener("resize", () => {
+
+  camera.aspect =
+    window.innerWidth / window.innerHeight;
+
+  camera.updateProjectionMatrix();
+
+  renderer.setSize(
+    window.innerWidth,
+    window.innerHeight
+  );
+
+  renderer.setPixelRatio(
+    Math.min(window.devicePixelRatio, 1.5)
+  );
+});
+
+</script>
 </body>
 </html>
